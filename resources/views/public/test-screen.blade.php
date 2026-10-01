@@ -62,9 +62,10 @@
                 <span class="font-mono text-sm sm:text-xl font-black" x-text="formattedTimer">--:--</span>
             </div>
 
-            <button @click="showConfirmSubmit = true" type="button"
-                    class="hidden sm:inline-flex items-center px-4 py-2 text-xs font-extrabold bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl shadow-md shadow-emerald-600/20 transition">
-                Selesai / Submit
+            <!-- Submit button in header: Only visible when candidate reaches the last question -->
+            <button x-show="isLastQuestion" @click="showConfirmSubmit = true" type="button" style="display: none;"
+                    class="hidden sm:inline-flex items-center px-4 py-2 text-xs font-extrabold bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl shadow-md shadow-emerald-600/20 transition animate-pulse">
+                Selesai / Submit 🏁
             </button>
         </div>
     </header>
@@ -152,19 +153,19 @@
                 <!-- Mobile Quick Jump / Palette Toggle -->
                 <button @click="showMobilePalette = true" type="button"
                         class="lg:hidden px-3 py-2 text-xs font-bold bg-slate-800 border border-slate-700 text-indigo-400 rounded-xl">
-                    Nomor: <strong class="text-white" x-text="currentIndex + 1"></strong>
+                    Nomor: <strong class="text-white" x-text="currentIndex + 1"></strong>/<span x-text="questions.length"></span>
                 </button>
 
-                <div class="sm:hidden">
-                    <button @click="showConfirmSubmit = true" type="button"
-                            class="px-3.5 py-2.5 text-xs font-extrabold bg-emerald-600 text-white rounded-xl">
-                        Submit
-                    </button>
-                </div>
+                <!-- Next Button (Shown ONLY when NOT on the last question) -->
+                <button x-show="!isLastQuestion" type="button" @click="nextQuestion()"
+                        class="px-4 sm:px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-md shadow-indigo-600/20 transition flex items-center gap-1.5">
+                    <span>Berikutnya</span> &rarr;
+                </button>
 
-                <button type="button" @click="nextQuestion()" :disabled="currentIndex === questions.length - 1"
-                        class="px-3.5 sm:px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold text-white shadow-md shadow-indigo-600/20 transition">
-                    <span class="hidden sm:inline">Berikutnya</span> &rarr;
+                <!-- Submit Button (Shown ONLY when candidate reaches the last question) -->
+                <button x-show="isLastQuestion" type="button" @click="showConfirmSubmit = true" style="display: none;"
+                        class="px-4 sm:px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-xs font-extrabold text-white shadow-lg shadow-emerald-600/30 transition flex items-center gap-1.5 animate-pulse">
+                    <span>Selesai & Kirim</span> ✅
                 </button>
             </div>
         </div>
@@ -200,11 +201,18 @@
                 </div>
             </div>
 
-            <!-- Submit Final Button in Sidebar -->
-            <button type="button" @click="showConfirmSubmit = true"
-                    class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs shadow-xl shadow-emerald-600/30 transition">
-                Selesai & Submit Ujian ✅
-            </button>
+            <!-- Submit Button in Sidebar: ONLY visible on the last question -->
+            <div>
+                <div x-show="!isLastQuestion" class="w-full py-3 px-4 rounded-2xl bg-slate-950/70 border border-slate-800 text-center space-y-1">
+                    <span class="text-[11px] font-bold text-slate-400 block">📌 Soal Terakhir: No. <span class="text-white font-extrabold" x-text="questions.length"></span></span>
+                    <span class="text-[10px] text-slate-500 block">Tombol submit akan muncul saat Anda membuka soal nomor terakhir.</span>
+                </div>
+
+                <button x-show="isLastQuestion" type="button" @click="showConfirmSubmit = true" style="display: none;"
+                        class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs shadow-xl shadow-emerald-600/30 transition animate-pulse">
+                    Selesai & Submit Ujian ✅
+                </button>
+            </div>
         </div>
     </div>
 
@@ -241,8 +249,13 @@
                 </template>
             </div>
 
-            <button type="button" @click="showMobilePalette = false; showConfirmSubmit = true"
-                    class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold text-xs">
+            <!-- Mobile Drawer Submit / Notice -->
+            <div x-show="!isLastQuestion" class="w-full py-2.5 px-3 rounded-xl bg-slate-950 border border-slate-800 text-center text-[11px] text-slate-400">
+                Tombol submit akan muncul di soal nomor terakhir (No. <span class="text-white font-bold" x-text="questions.length"></span>)
+            </div>
+
+            <button x-show="isLastQuestion" type="button" @click="showMobilePalette = false; showConfirmSubmit = true" style="display: none;"
+                    class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold text-xs animate-pulse">
                 Selesai & Submit Ujian ✅
             </button>
         </div>
@@ -272,6 +285,26 @@
         </div>
     </div>
 
+    <!-- Auto-Submit Timeout Overlay (Smooth Non-blocking) -->
+    <div x-show="isTimeOutSubmitting" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-lg" style="display: none;">
+        <div class="bg-slate-900 border border-amber-500/30 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center space-y-4">
+            <div class="w-16 h-16 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-3xl mx-auto font-bold animate-pulse">
+                ⏰
+            </div>
+            <h3 class="text-lg sm:text-xl font-black text-white">Waktu Ujian Telah Habis!</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+                Waktu pengerjaan tes psikotes Anda telah selesai. Sistem secara otomatis sedang menyimpan jawaban dan mengarahkan ke halaman hasil ujian...
+            </p>
+            <div class="flex items-center justify-center gap-2.5 text-indigo-400 text-xs font-bold pt-2">
+                <svg class="animate-spin h-5 w-5 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Mengirim jawaban otomatis...</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Test Screen Controller Logic -->
     <script>
         function testScreen(config) {
@@ -284,6 +317,7 @@
                 csrfToken: config.csrfToken,
                 isSaving: false,
                 isSubmitting: false,
+                isTimeOutSubmitting: false,
                 saveStatus: '',
                 showConfirmSubmit: false,
                 showMobilePalette: false,
@@ -295,6 +329,10 @@
 
                 get answeredCount() {
                     return this.questions.filter(q => q.is_answered).length;
+                },
+
+                get isLastQuestion() {
+                    return this.questions && this.questions.length > 0 && this.currentIndex === (this.questions.length - 1);
                 },
 
                 get formattedTimer() {
@@ -309,10 +347,17 @@
                             this.remainingSeconds--;
                         } else {
                             clearInterval(this.timerInterval);
-                            alert('Waktu ujian telah habis! Sistem secara otomatis akan menyimpan & mensubmit seluruh jawaban Anda.');
-                            this.submitTest();
+                            this.autoSubmitOnTimeout();
                         }
                     }, 1000);
+                },
+
+                autoSubmitOnTimeout() {
+                    if (this.isSubmitting) return;
+                    this.isTimeOutSubmitting = true;
+                    this.showConfirmSubmit = false;
+                    this.showMobilePalette = false;
+                    this.submitTest();
                 },
 
                 nextQuestion() {
@@ -372,6 +417,7 @@
                 },
 
                 async submitTest() {
+                    if (this.isSubmitting && !this.isTimeOutSubmitting) return;
                     this.isSubmitting = true;
                     try {
                         let res = await fetch(this.submitUrl, {
@@ -385,10 +431,12 @@
                         let data = await res.json();
                         if (data.redirect_url) {
                             window.location.href = data.redirect_url;
+                            return;
                         }
                     } catch (e) {
-                        window.location.href = '{{ route('home') }}';
+                        console.error('Submit error:', e);
                     }
+                    window.location.href = '{{ route('public.test.result', $token) }}';
                 }
             };
         }
