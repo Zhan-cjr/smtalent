@@ -78,6 +78,7 @@ Route::middleware(['auth', 'role.hrd'])->prefix('hrd')->name('hrd.')->group(func
     // Reports & Exports
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.export.excel');
+    Route::get('/reports/export-psychotest-excel', [ReportController::class, 'exportPsychotestExcel'])->name('reports.export.psychotest');
     Route::get('/reports/candidates/{candidate}/pdf', [ReportController::class, 'exportCandidatePdf'])->name('reports.candidate.pdf');
 
     // Settings, User Management & Audit Logs

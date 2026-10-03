@@ -13,8 +13,8 @@
                 <h3 class="text-base font-bold text-slate-900">Leaderboard Psikotes ({{ $rankings->count() }} Kandidat)</h3>
                 <p class="text-xs text-slate-500">Kandidat dengan nilai &ge; {{ $passingGrade }} berhak diundang ke tahapan wawancara</p>
             </div>
-            <a href="{{ route('hrd.reports.export.excel') }}" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs shadow-xs transition flex items-center gap-1.5">
-                <span>📊</span> Export Rekap
+            <a href="{{ route('hrd.reports.export.psychotest', request()->query()) }}" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs shadow-xs transition flex items-center gap-1.5">
+                <span>📊</span> Export Rekap Psikotes
             </a>
         </div>
 

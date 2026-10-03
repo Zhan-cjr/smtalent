@@ -13,7 +13,7 @@
                 <h3 class="text-base font-bold text-slate-900">Hasil Akhir Keputusan Rekrutmen ({{ $rankings->count() }} Kandidat)</h3>
                 <p class="text-xs text-slate-500">Ranking diurutkan dari Nilai Akhir tertinggi. Jika nilai sama, nilai psikotes dan kecepatan waktu menjadi tie-breaker.</p>
             </div>
-            <a href="{{ route('hrd.reports.export.excel') }}" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5">
+            <a href="{{ route('hrd.reports.export.excel', request()->query()) }}" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5">
                 <span>📄</span> Export Laporan Excel
             </a>
         </div>
